@@ -9,14 +9,14 @@ interface BaseResult {
     type: "person" | "file" | "folder";
 }
 
-interface PersonResult extends BaseResult {
+export interface PersonResult extends BaseResult {
     type: "person";
     status: string;
     avatar: string;
     presence: Presence;
 }
 
-interface FileResult extends BaseResult {
+export interface FileResult extends BaseResult {
     type: "file";
     location: string;
     icon: "image" | "video" | "doc";
@@ -24,7 +24,7 @@ interface FileResult extends BaseResult {
     added?: string;
 }
 
-interface FolderResult extends BaseResult {
+export interface FolderResult extends BaseResult {
     type: "folder";
     location: string;
     icon: "folder";
@@ -32,7 +32,7 @@ interface FolderResult extends BaseResult {
     edited: string;
 }
 
-type SearchResult = PersonResult | FileResult | FolderResult;
+export type SearchResult = PersonResult | FileResult | FolderResult;
 
 
 interface SearchFilters {
@@ -47,6 +47,8 @@ interface SearchCounts {
     all: number;
     files: number;
     people: number;
+    chats: number;
+    lists: number;
 }
 
 interface SearchData {
@@ -120,9 +122,11 @@ const data: SearchData = {
         ]
     },
     "counts": {
-        "all": 9,
-        "files": 6,
-        "people": 3
+        "all": 6,
+        "files": 3,
+        "people": 3,
+        "chats": 0,
+        "lists": 0
     }
 }
 
@@ -130,12 +134,22 @@ export const useSearch = () => {
     const [query, setQuery] = useState("")
     const [searchResult, SetSearchResult] = useState<SearchData | null>(null);
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        (() => {
-            fetchData()
-        })()
-    }, [query])
+    const [filters, setFilters] = useState<SearchFilters>({
+        files: true,
+        people: true,
+        chats: false,
+        lists: false
+    });
+    const [activeTab, setActiveTab] = useState<'all' | 'files' | 'people' | 'chats' | 'lists'>('all');
 
+    useEffect(() => {
+        if (query.length > 0) {
+            fetchData()
+        } else {
+            SetSearchResult(null);
+            setLoading(false);
+        }
+    }, [query])
 
     const fetchData = async () => {
         try {
@@ -147,11 +161,24 @@ export const useSearch = () => {
         } catch (error) {
             console.log(error);
             setLoading(false)
-
-        } finally {
-
         }
     }
 
-    return { query, setQuery, loading, searchResult }
+    const toggleFilter = (filterType: keyof SearchFilters) => {
+        setFilters(prev => ({
+            ...prev,
+            [filterType]: !prev[filterType]
+        }));
+    };
+
+    return {
+        query,
+        setQuery,
+        loading,
+        searchResult,
+        filters,
+        toggleFilter,
+        activeTab,
+        setActiveTab
+    }
 }

@@ -25,7 +25,7 @@ export const useCountUp = (end: number, duration: number = 500) => {
             } else {
                 setCount(current);
             }
-        }, 16);
+        }, 8);
 
         return () => clearInterval(timer);
     }, [end, duration]);
