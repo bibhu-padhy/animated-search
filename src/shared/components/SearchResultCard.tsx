@@ -20,7 +20,7 @@ const SearchResultCard = ({ searchResult }: SearchResultProps) => {
         <>
 
             {searchResult.length && searchResult.map((result, index) => {
-                const { name, id, type } = result
+                const { id, type } = result
                 return (
                     <div
                         key={id}
